@@ -7,3 +7,7 @@ class News(models.Model):
     description = models.TextField()
     image = models.URLField()
     external_link = models.URLField() 
+    
+    
+class Info(models.Model):
+    info = models.CharField(max_length=100)

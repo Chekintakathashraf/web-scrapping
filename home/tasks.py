@@ -19,3 +19,35 @@ def download_image(image_url, save_directory, image_name):
     else:
         print(f"Failed to download image. Status Code: {response.status_code}")
         return None
+    
+    
+from celery import shared_task
+from .models import Info
+
+@shared_task
+def create_news():
+    Info.objects.create(info="This is added by celery beat")
+    
+from django_celery_beat.models import PeriodicTask, IntervalSchedule
+import json
+
+# schedule, created = IntervalSchedule.objects.get_or_create(
+#     every=1,
+#     period=IntervalSchedule.MINUTES
+# )
+
+schedule, created = IntervalSchedule.objects.get_or_create(
+    every=3,
+    period=IntervalSchedule.SECONDS
+)
+
+PeriodicTask.objects.update_or_create(
+    name="Create info",
+    defaults={
+        'task': 'home.tasks.create_news',
+        'interval': schedule,
+        'args': json.dumps([]),
+    }
+)
+
+
