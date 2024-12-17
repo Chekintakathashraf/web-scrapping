@@ -4,22 +4,24 @@ import requests
 from bs4 import BeautifulSoup
 from home.models import News
 
-def download_image(image_url, save_directory, image_name):
+# def download_image(image_url, save_directory, image_name):
   
-    if not os.path.exists(save_directory):
-        os.makedirs(save_directory)
+#     if not os.path.exists(save_directory):
+#         os.makedirs(save_directory)
     
-    image_path = os.path.join(save_directory, image_name)
-    response = requests.get(image_url, stream=True)
+#     image_path = os.path.join(save_directory, image_name)
+#     response = requests.get(image_url, stream=True)
     
-    if response.status_code == 200:
-        with open(image_path, 'wb') as file:
-            for chunk in response.iter_content(1024):
-                file.write(chunk)
-        return image_path
-    else:
-        print(f"Failed to download image. Status Code: {response.status_code}")
-        return None
+#     if response.status_code == 200:
+#         with open(image_path, 'wb') as file:
+#             for chunk in response.iter_content(1024):
+#                 file.write(chunk)
+#         return image_path
+#     else:
+#         print(f"Failed to download image. Status Code: {response.status_code}")
+#         return None
+
+from .tasks import download_image
 
 def scrape_imdb_news():
 
@@ -60,7 +62,8 @@ def scrape_imdb_news():
         image_path = None
         if image_url:
             image_name = f"image_{uuid.uuid4()}.jpg"
-            image_path = download_image(image_url, 'downloads', image_name)
+            # image_path = download_image(image_url, 'downloads/', image_name)
+            image_path = download_image.delay(image_url, 'downloads/', image_name)
         
         # Save the data into the database if external link is unique
         if external_link and not News.objects.filter(external_link=external_link).exists():
